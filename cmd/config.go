@@ -1,40 +1,122 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/lordofthemind/gollama/configs"
 	"github.com/spf13/cobra"
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Manage the application configuration",
+	Long: `Configure the application by setting initial values or updating them as needed.
+If the configuration is not set, you will be prompted to input the initial setup values.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config called")
+		config, configPath, err := configs.LoadGlobalConfig()
+		if err != nil {
+			fmt.Println("Error loading configuration:", err)
+			return
+		}
+
+		// Check if setup has already been completed
+		if config.SetupCompleted {
+			fmt.Println("Configuration already exists:")
+			configs.DisplayConfig(config)
+
+			// Ask if the user wants to edit the configuration
+			fmt.Print("Do you want to edit the configuration? (yes/no): ")
+			if askForConfirmation() {
+				config = promptForConfiguration(config)
+				fmt.Println("New configuration:")
+				configs.DisplayConfig(config)
+				if askForConfirmation() {
+					if err := configs.SaveGlobalConfig(config, configPath); err != nil {
+						fmt.Println("Error saving configuration:", err)
+						return
+					}
+					fmt.Println("Configuration updated successfully.")
+				} else {
+					fmt.Println("Configuration update canceled.")
+				}
+			} else {
+				fmt.Println("No changes made to the configuration.")
+			}
+		} else {
+			fmt.Println("Initial configuration required.")
+			config = promptForConfiguration(config)
+			fmt.Println("Please confirm your configuration:")
+			configs.DisplayConfig(config)
+			if askForConfirmation() {
+				config.SetupCompleted = true
+				if err := configs.SaveGlobalConfig(config, configPath); err != nil {
+					fmt.Println("Error saving configuration:", err)
+					return
+				}
+				fmt.Println("Configuration saved successfully.")
+			} else {
+				fmt.Println("Configuration setup canceled.")
+			}
+		}
 	},
 }
 
+// init function adds the configCmd to rootCmd
 func init() {
 	rootCmd.AddCommand(configCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+// promptForConfiguration prompts the user for each configuration setting
+func promptForConfiguration(config configs.GollamaGlobalConfig) configs.GollamaGlobalConfig {
+	reader := bufio.NewReader(os.Stdin)
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// configCmd.PersistentFlags().String("foo", "", "A help for foo")
+	fmt.Print("Enter Ollama URL: ")
+	config.OllamaURL = readInput(reader)
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	fmt.Print("Enter Primary Model: ")
+	config.PrimaryModel = readInput(reader)
+
+	fmt.Print("Enter Secondary Model: ")
+	config.SecondaryModel = readInput(reader)
+
+	fmt.Print("Enter Tertiary Model: ")
+	config.TertiaryModel = readInput(reader)
+
+	fmt.Print("Enter Temperature (e.g., 0.5): ")
+	config.Temperature = readFloatInput(reader)
+
+	return config
+}
+
+// readInput reads input from the user and trims whitespace
+func readInput(reader *bufio.Reader) string {
+	input, _ := reader.ReadString('\n')
+	return strings.TrimSpace(input)
+}
+
+// readFloatInput reads a float input from the user and returns it
+func readFloatInput(reader *bufio.Reader) float64 {
+	var value float64
+	for {
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+		_, err := fmt.Sscanf(input, "%f", &value)
+		if err == nil {
+			break
+		}
+		fmt.Print("Invalid input. Please enter a valid number: ")
+	}
+	return value
+}
+
+// askForConfirmation prompts the user to confirm an action
+func askForConfirmation() bool {
+	reader := bufio.NewReader(os.Stdin)
+	response, _ := reader.ReadString('\n')
+	response = strings.ToLower(strings.TrimSpace(response))
+	return response == "yes" || response == "y"
 }
