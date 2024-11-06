@@ -44,14 +44,12 @@ func getOllamaModels() ([]string, error) {
 	return models, nil
 }
 
-// Function to initiate first-time setup
+// Main setup function for initial or reconfiguration
 func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
-	// Ensure Ollama is installed before proceeding
 	if !checkOllamaInstallation() {
 		return
 	}
 
-	// Retrieve list of available models
 	models, err := getOllamaModels()
 	if err != nil {
 		fmt.Println("Error retrieving models from Ollama:", err)
@@ -91,7 +89,6 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 
 		confirmation := readInput(reader)
 		if confirmation == "y" {
-			// Set SetupCompleted to true and save config
 			config.SetupCompleted = true
 			err := configs.SaveGlobalConfig(*config, configPath)
 			if err != nil {
@@ -102,7 +99,7 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 			break
 		} else if confirmation == "n" {
 			fmt.Println("Let's re-enter the details.")
-			initiateSetup(config, configPath) // Recursive call to re-enter setup
+			initiateSetup(config, configPath)
 			break
 		} else {
 			fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
@@ -162,6 +159,7 @@ var (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the application configuration",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		config, configPath, err := configs.LoadGlobalConfig()
 		if err != nil {
@@ -169,8 +167,24 @@ var configCmd = &cobra.Command{
 			return
 		}
 
+		// Check if config file exists; if not, create it with full setup
 		if !config.SetupCompleted {
 			initiateSetup(&config, configPath)
+			return
+		}
+
+		// If no flags, show current configuration and prompt for edit
+		if !cmd.Flags().Changed("temp") && !cmd.Flags().Changed("pmodel") &&
+			!cmd.Flags().Changed("smodel") && !cmd.Flags().Changed("tmodel") {
+			fmt.Println("Configuration already exists:")
+			configs.DisplayConfig(config)
+			fmt.Print("Do you want to edit the configuration? (y/n): ")
+			if readInput(bufio.NewReader(os.Stdin)) == "y" {
+				initiateSetup(&config, configPath)
+			} else {
+				fmt.Println("No changes made to the configuration.")
+			}
+			return
 		}
 
 		// Track updates
@@ -223,22 +237,10 @@ var configCmd = &cobra.Command{
 			} else {
 				fmt.Println("Configuration updated successfully.")
 			}
-		} else if !cmd.Flags().Changed("temp") && !cmd.Flags().Changed("pmodel") &&
-			!cmd.Flags().Changed("smodel") && !cmd.Flags().Changed("tmodel") {
-			// Show configuration if no flags were passed
-			fmt.Println("Configuration already exists!")
-			configs.DisplayConfig(config)
-			fmt.Print("Do you want to edit the configuration? (y/n): ")
-			if readInput(bufio.NewReader(os.Stdin)) == "y" {
-				initiateSetup(&config, configPath)
-			} else {
-				fmt.Println("No changes made to the configuration.")
-			}
 		}
 	},
 }
 
-// Function to validate if a model is in the list of available Ollama models
 func validateModel(model string, models []string) bool {
 	for _, m := range models {
 		if m == model {
