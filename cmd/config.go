@@ -13,6 +13,8 @@ import (
 	"github.com/lordofthemind/gollama/configs"
 )
 
+const defaultOllamaURL = "http://localhost:11434/" // Default Ollama URL
+
 // Function to check if `ollama` is installed
 func checkOllamaInstallation() bool {
 	_, err := exec.LookPath("ollama")
@@ -58,28 +60,25 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Initial setup required. Please provide the following details:")
-
-	// Prompt for Ollama URL
-	fmt.Print("Enter Ollama URL: ")
+	fmt.Printf("Enter Ollama URL (default: %s): ", defaultOllamaURL)
 	config.OllamaURL = readInput(reader)
+	if config.OllamaURL == "" {
+		config.OllamaURL = defaultOllamaURL
+	}
 
-	// Prompt for Primary Model with validation from list of available models
 	fmt.Println("Available models:")
 	for i, model := range models {
 		fmt.Printf("%d. %s\n", i+1, model)
 	}
-	fmt.Print("Enter the number corresponding to your Primary Model: ")
+
+	fmt.Print("Select Primary Model by entering the corresponding number: ")
 	config.PrimaryModel = selectModel(reader, models)
-
-	// Prompt for Secondary Model
-	fmt.Print("Enter the number corresponding to your Secondary Model: ")
+	fmt.Print("Select Secondary Model by entering the corresponding number: ")
 	config.SecondaryModel = selectModel(reader, models)
-
-	// Prompt for Tertiary Model
-	fmt.Print("Enter the number corresponding to your Tertiary Model: ")
+	fmt.Print("Select Tertiary Model by entering the corresponding number: ")
 	config.TertiaryModel = selectModel(reader, models)
 
-	// Prompt for Temperature
+	displayTemperatureGuidance()
 	config.Temperature = readFloatInput(reader)
 
 	// Confirmation prompt
@@ -109,6 +108,15 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 	}
 }
 
+// Helper function to display temperature guidance
+func displayTemperatureGuidance() {
+	fmt.Println("\n### Temperature Guidance ###")
+	fmt.Println("Temperature settings guide:")
+	fmt.Println("0.0 - 0.3: Deterministic, ideal for precise tasks")
+	fmt.Println("0.4 - 0.7: Balanced, suitable for conversations")
+	fmt.Println("0.8 - 1.0: High randomness, for creative tasks")
+}
+
 // Helper function to select a model based on user input
 func selectModel(reader *bufio.Reader, models []string) string {
 	for {
@@ -131,16 +139,23 @@ func readInput(reader *bufio.Reader) string {
 func readFloatInput(reader *bufio.Reader) float64 {
 	var value float64
 	for {
-		fmt.Print("Enter Temperature (e.g., 0.5): ")
+		fmt.Print("Enter Temperature (0.1 - 1.0, e.g., 0.5): ")
 		input := readInput(reader)
 		_, err := fmt.Sscanf(input, "%f", &value)
-		if err == nil {
+		if err == nil && value >= 0.1 && value <= 1.0 {
 			break
 		}
-		fmt.Println("Invalid input. Please enter a valid number.")
+		fmt.Println("Invalid input. Please enter a valid number between 0.1 and 1.0.")
 	}
 	return value
 }
+
+var (
+	tempFlag   float64
+	pModelFlag string
+	sModelFlag string
+	tModelFlag string
+)
 
 var configCmd = &cobra.Command{
 	Use:   "config",
@@ -152,16 +167,35 @@ var configCmd = &cobra.Command{
 			return
 		}
 
-		// Check if setup has already been completed
 		if config.SetupCompleted {
 			fmt.Println("Configuration already exists:")
 			configs.DisplayConfig(config)
 
-			fmt.Print("Do you want to edit the configuration? (yes/no): ")
-			if readInput(bufio.NewReader(os.Stdin)) == "yes" {
-				initiateSetup(&config, configPath)
+			if tempFlag >= 0.1 && tempFlag <= 1.0 {
+				config.Temperature = tempFlag
+			}
+
+			models, err := getOllamaModels()
+			if err != nil {
+				fmt.Println("Error retrieving models:", err)
+				return
+			}
+
+			if pModelFlag != "" && validateModel(pModelFlag, models) {
+				config.PrimaryModel = pModelFlag
+			}
+			if sModelFlag != "" && validateModel(sModelFlag, models) {
+				config.SecondaryModel = sModelFlag
+			}
+			if tModelFlag != "" && validateModel(tModelFlag, models) {
+				config.TertiaryModel = tModelFlag
+			}
+
+			err = configs.SaveGlobalConfig(config, configPath)
+			if err != nil {
+				fmt.Println("Error saving configuration:", err)
 			} else {
-				fmt.Println("No changes made to the configuration.")
+				fmt.Println("Configuration updated successfully.")
 			}
 		} else {
 			initiateSetup(&config, configPath)
@@ -169,6 +203,21 @@ var configCmd = &cobra.Command{
 	},
 }
 
+// Function to validate if a model is in the list of available Ollama models
+func validateModel(model string, models []string) bool {
+	for _, m := range models {
+		if m == model {
+			return true
+		}
+	}
+	fmt.Printf("Model %s is not available in Ollama installation.\n", model)
+	return false
+}
+
 func init() {
 	rootCmd.AddCommand(configCmd)
+	configCmd.Flags().Float64VarP(&tempFlag, "temp", "t", 0.5, "Temperature setting for the model (0.1 to 1.0)")
+	configCmd.Flags().StringVarP(&pModelFlag, "pmodel", "p", "", "Primary model name")
+	configCmd.Flags().StringVarP(&sModelFlag, "smodel", "s", "", "Secondary model name")
+	configCmd.Flags().StringVarP(&tModelFlag, "tmodel", "e", "", "Tertiary model name")
 }
