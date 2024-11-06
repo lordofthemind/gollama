@@ -173,7 +173,7 @@ var configCmd = &cobra.Command{
 			initiateSetup(&config, configPath)
 		}
 
-		// Flag check: whether any updates were actually made
+		// Track updates
 		anyUpdate := false
 		models, err := getOllamaModels()
 		if err != nil {
@@ -181,29 +181,41 @@ var configCmd = &cobra.Command{
 			return
 		}
 
-		// Only update and print if flags are provided
+		// Apply flag-based updates
 		if tempFlag != 0.5 {
 			config.Temperature = tempFlag
 			fmt.Printf("Temperature updated to: %.2f\n", config.Temperature)
 			anyUpdate = true
 		}
-		if pModelFlag != "" && validateModel(pModelFlag, models) {
-			config.PrimaryModel = pModelFlag
-			fmt.Printf("Primary Model updated to: %s\n", config.PrimaryModel)
-			anyUpdate = true
+		if pModelFlag != "" {
+			if validateModel(pModelFlag, models) {
+				config.PrimaryModel = pModelFlag
+				fmt.Printf("Primary Model updated to: %s\n", config.PrimaryModel)
+				anyUpdate = true
+			} else {
+				return
+			}
 		}
-		if sModelFlag != "" && validateModel(sModelFlag, models) {
-			config.SecondaryModel = sModelFlag
-			fmt.Printf("Secondary Model updated to: %s\n", config.SecondaryModel)
-			anyUpdate = true
+		if sModelFlag != "" {
+			if validateModel(sModelFlag, models) {
+				config.SecondaryModel = sModelFlag
+				fmt.Printf("Secondary Model updated to: %s\n", config.SecondaryModel)
+				anyUpdate = true
+			} else {
+				return
+			}
 		}
-		if tModelFlag != "" && validateModel(tModelFlag, models) {
-			config.TertiaryModel = tModelFlag
-			fmt.Printf("Tertiary Model updated to: %s\n", config.TertiaryModel)
-			anyUpdate = true
+		if tModelFlag != "" {
+			if validateModel(tModelFlag, models) {
+				config.TertiaryModel = tModelFlag
+				fmt.Printf("Tertiary Model updated to: %s\n", config.TertiaryModel)
+				anyUpdate = true
+			} else {
+				return
+			}
 		}
 
-		// If any updates were made, save and confirm
+		// Save only if updates were made
 		if anyUpdate {
 			err = configs.SaveGlobalConfig(config, configPath)
 			if err != nil {
@@ -211,8 +223,9 @@ var configCmd = &cobra.Command{
 			} else {
 				fmt.Println("Configuration updated successfully.")
 			}
-		} else {
-			// If no flags were set, display existing config and prompt for editing
+		} else if !cmd.Flags().Changed("temp") && !cmd.Flags().Changed("pmodel") &&
+			!cmd.Flags().Changed("smodel") && !cmd.Flags().Changed("tmodel") {
+			// Show configuration if no flags were passed
 			fmt.Println("Configuration already exists!")
 			configs.DisplayConfig(config)
 			fmt.Print("Do you want to edit the configuration? (y/n): ")
