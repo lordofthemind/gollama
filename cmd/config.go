@@ -59,7 +59,9 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Initial setup required. Please provide the following details:")
+	if !config.SetupCompleted {
+		fmt.Println("Initial setup required. Please provide the following details:")
+	}
 	fmt.Printf("Enter Ollama URL (default: %s): ", defaultOllamaURL)
 	config.OllamaURL = readInput(reader)
 	if config.OllamaURL == "" {
@@ -167,42 +169,42 @@ var configCmd = &cobra.Command{
 			return
 		}
 
-		if config.SetupCompleted {
-			fmt.Println("Configuration already exists:")
-			configs.DisplayConfig(config)
+		if !config.SetupCompleted {
+			initiateSetup(&config, configPath)
+		}
 
-			// Check if any flags were provided, otherwise ask the user
-			if tempFlag == 0.5 && pModelFlag == "" && sModelFlag == "" && tModelFlag == "" {
-				fmt.Print("Do you want to edit the configuration? (y/n): ")
-				if readInput(bufio.NewReader(os.Stdin)) == "y" {
-					initiateSetup(&config, configPath)
-					return
-				} else {
-					fmt.Println("No changes made to the configuration.")
-					return
-				}
-			}
+		// Flag check: whether any updates were actually made
+		anyUpdate := false
+		models, err := getOllamaModels()
+		if err != nil {
+			fmt.Println("Error retrieving models:", err)
+			return
+		}
 
-			// Proceed to update config with flags if they were provided
-			models, err := getOllamaModels()
-			if err != nil {
-				fmt.Println("Error retrieving models:", err)
-				return
-			}
+		// Only update and print if flags are provided
+		if tempFlag != 0.5 {
+			config.Temperature = tempFlag
+			fmt.Printf("Temperature updated to: %.2f\n", config.Temperature)
+			anyUpdate = true
+		}
+		if pModelFlag != "" && validateModel(pModelFlag, models) {
+			config.PrimaryModel = pModelFlag
+			fmt.Printf("Primary Model updated to: %s\n", config.PrimaryModel)
+			anyUpdate = true
+		}
+		if sModelFlag != "" && validateModel(sModelFlag, models) {
+			config.SecondaryModel = sModelFlag
+			fmt.Printf("Secondary Model updated to: %s\n", config.SecondaryModel)
+			anyUpdate = true
+		}
+		if tModelFlag != "" && validateModel(tModelFlag, models) {
+			config.TertiaryModel = tModelFlag
+			fmt.Printf("Tertiary Model updated to: %s\n", config.TertiaryModel)
+			anyUpdate = true
+		}
 
-			if tempFlag >= 0.1 && tempFlag <= 1.0 {
-				config.Temperature = tempFlag
-			}
-			if pModelFlag != "" && validateModel(pModelFlag, models) {
-				config.PrimaryModel = pModelFlag
-			}
-			if sModelFlag != "" && validateModel(sModelFlag, models) {
-				config.SecondaryModel = sModelFlag
-			}
-			if tModelFlag != "" && validateModel(tModelFlag, models) {
-				config.TertiaryModel = tModelFlag
-			}
-
+		// If any updates were made, save and confirm
+		if anyUpdate {
 			err = configs.SaveGlobalConfig(config, configPath)
 			if err != nil {
 				fmt.Println("Error saving configuration:", err)
@@ -210,7 +212,15 @@ var configCmd = &cobra.Command{
 				fmt.Println("Configuration updated successfully.")
 			}
 		} else {
-			initiateSetup(&config, configPath)
+			// If no flags were set, display existing config and prompt for editing
+			fmt.Println("Configuration already exists!")
+			configs.DisplayConfig(config)
+			fmt.Print("Do you want to edit the configuration? (y/n): ")
+			if readInput(bufio.NewReader(os.Stdin)) == "y" {
+				initiateSetup(&config, configPath)
+			} else {
+				fmt.Println("No changes made to the configuration.")
+			}
 		}
 	},
 }

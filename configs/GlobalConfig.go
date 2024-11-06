@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"github.com/spf13/viper"
-
 )
 
 // GollamaGlobalConfig represents the structure of the configuration file
@@ -104,5 +103,4 @@ func DisplayConfig(config GollamaGlobalConfig) {
 	fmt.Printf("Primary Model: %s\n", config.PrimaryModel)
 	fmt.Printf("Secondary Model: %s\n", config.SecondaryModel)
 	fmt.Printf("Tertiary Model: %s\n", config.TertiaryModel)
-	fmt.Printf("Setup Completed: %v\n", config.SetupCompleted)
 }
