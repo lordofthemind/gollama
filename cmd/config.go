@@ -171,16 +171,28 @@ var configCmd = &cobra.Command{
 			fmt.Println("Configuration already exists:")
 			configs.DisplayConfig(config)
 
-			if tempFlag >= 0.1 && tempFlag <= 1.0 {
-				config.Temperature = tempFlag
+			// Check if any flags were provided, otherwise ask the user
+			if tempFlag == 0.5 && pModelFlag == "" && sModelFlag == "" && tModelFlag == "" {
+				fmt.Print("Do you want to edit the configuration? (y/n): ")
+				if readInput(bufio.NewReader(os.Stdin)) == "y" {
+					initiateSetup(&config, configPath)
+					return
+				} else {
+					fmt.Println("No changes made to the configuration.")
+					return
+				}
 			}
 
+			// Proceed to update config with flags if they were provided
 			models, err := getOllamaModels()
 			if err != nil {
 				fmt.Println("Error retrieving models:", err)
 				return
 			}
 
+			if tempFlag >= 0.1 && tempFlag <= 1.0 {
+				config.Temperature = tempFlag
+			}
 			if pModelFlag != "" && validateModel(pModelFlag, models) {
 				config.PrimaryModel = pModelFlag
 			}
