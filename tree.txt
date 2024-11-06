@@ -1,0 +1,18 @@
+.
+├── LICENSE
+├── Readme.md
+├── build
+├── cmd
+│   ├── config.go
+│   ├── init.go
+│   └── root.go
+├── configs
+├── go.mod
+├── go.sum
+├── gollama.go.tpl
+├── main.go
+├── services
+├── tree.txt
+└── utils
+
+6 directories, 10 files

@@ -95,3 +95,5 @@ A command-line tool (`gollama`) that integrates directly with the Ollama API, al
 
 4. **Review in VS Code**:  
    - The response file opens automatically in a new editor pane for easy reading and reference.
+
+   
