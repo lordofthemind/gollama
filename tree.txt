@@ -3,6 +3,7 @@
 ├── Readme.md
 ├── build
 ├── cmd
+│   ├── chat.go
 │   ├── cnfg.go
 │   ├── init.go
 │   ├── root.go
@@ -20,4 +21,4 @@
     ├── CnfgUtils.go
     └── UpdtUtils.go
 
-6 directories, 15 files
+6 directories, 16 files
