@@ -5,8 +5,11 @@
 ├── cmd
 │   ├── config.go
 │   ├── init.go
-│   └── root.go
+│   ├── root.go
+│   └── updt.go
 ├── configs
+│   ├── GlobalConfig.go
+│   └── WorkspaceConfig.go
 ├── go.mod
 ├── go.sum
 ├── gollama.go.tpl
@@ -14,5 +17,6 @@
 ├── services
 ├── tree.txt
 └── utils
+    └── ConfigUtils.go
 
-6 directories, 10 files
+6 directories, 14 files
