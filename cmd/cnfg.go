@@ -45,7 +45,7 @@ var cnfgCmd = &cobra.Command{
 		if !cmd.Flags().Changed("temp") && !cmd.Flags().Changed("pmodel") &&
 			!cmd.Flags().Changed("smodel") && !cmd.Flags().Changed("tmodel") {
 			fmt.Println("Configuration already exists:")
-			configs.DisplayConfig(config)
+			configs.DisplayGlobalConfig(config)
 			fmt.Print("Do you want to edit the configuration? (y/n): ")
 			if utils.ReadInput(bufio.NewReader(os.Stdin)) == "y" {
 				initiateSetup(&config, configPath)
@@ -167,7 +167,7 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 	// Confirmation prompt
 	for {
 		fmt.Println("\nPlease confirm the details you entered:")
-		configs.DisplayConfig(*config)
+		configs.DisplayGlobalConfig(*config)
 		fmt.Print("Are these details correct? (y/n): ")
 
 		confirmation := utils.ReadInput(reader)

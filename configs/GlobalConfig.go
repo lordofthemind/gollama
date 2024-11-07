@@ -95,8 +95,8 @@ func SaveGlobalConfig(config GollamaGlobalConfig, configPath string) error {
 	return viper.WriteConfigAs(configPath)
 }
 
-// DisplayConfig prints the current configuration from the file
-func DisplayConfig(config GollamaGlobalConfig) {
+// DisplayGlobalConfig prints the current configuration from the file
+func DisplayGlobalConfig(config GollamaGlobalConfig) {
 	fmt.Println("Current Global Configuration:")
 	fmt.Printf("Ollama URL: %s\n", config.OllamaURL)
 	fmt.Printf("Temperature: %.2f\n", config.Temperature)
