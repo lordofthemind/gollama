@@ -17,14 +17,14 @@ var chatCmd = &cobra.Command{
 	Long: `The chat command enables an interactive conversation with the assistant.
 By default, it uses streaming mode with the primary model from the configuration.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Load the configuration with workspace taking priority if available
+		// Load the configuration
 		config, err := configs.LoadConfig()
 		if err != nil {
 			fmt.Printf("Error loading configuration: %v\n", err)
 			os.Exit(1)
 		}
 
-		// Determine the model and mode based on flags
+		// Determine the model to use based on flags
 		var model string
 		if useSecondary, _ := cmd.Flags().GetBool("secondary"); useSecondary {
 			model = config.SecondaryModel
@@ -34,16 +34,30 @@ By default, it uses streaming mode with the primary model from the configuration
 			model = config.PrimaryModel
 		}
 
-		// Check if streaming or non-streaming mode is requested
+		// Set up the PromptConfig struct with model, temperature, and URL
+		promptConfig := services.PromptConfig{
+			Model:       model,
+			Temperature: config.Temperature,
+			URL:         config.OllamaURL,
+		}
+
+		// Ensure a prompt is provided
+		if len(args) == 0 {
+			fmt.Println("Please provide a prompt for the chat command.")
+			return
+		}
+		prompt := args[0]
+
+		// Determine response mode based on flag and call appropriate function
 		if responseMode, _ := cmd.Flags().GetBool("response"); responseMode {
 			// Non-streaming mode
-			err := services.GenerateCompletion(model, args[0], config.Temperature)
+			err := services.GenerateCompletion(prompt, promptConfig)
 			if err != nil {
 				fmt.Printf("Error in completion generation: %v\n", err)
 			}
 		} else {
 			// Default to streaming mode
-			err := services.GenerateStreamingCompletion(model, args[0], config.Temperature)
+			err := services.GenerateStreamingCompletion(prompt, promptConfig)
 			if err != nil {
 				fmt.Printf("Error in streaming completion generation: %v\n", err)
 			}

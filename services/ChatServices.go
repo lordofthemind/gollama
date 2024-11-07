@@ -23,12 +23,19 @@ type GenerateResponse struct {
 	Context  []int  `json:"context,omitempty"`
 }
 
+// In your configs package
+type PromptConfig struct {
+	Model       string
+	Temperature float64
+	URL         string
+}
+
 // GenerateCompletion sends a non-streaming request
-func GenerateCompletion(model, prompt string, temperature float64) error {
+func GenerateCompletion(prompt string, config PromptConfig) error {
 	request := GenerateRequest{
-		Model:       model,
+		Model:       config.Model,
 		Prompt:      prompt,
-		Temperature: temperature,
+		Temperature: config.Temperature,
 	}
 
 	jsonData, err := json.Marshal(request)
@@ -36,7 +43,7 @@ func GenerateCompletion(model, prompt string, temperature float64) error {
 		return fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := http.Post("http://localhost:11434/api/generate", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(config.URL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("error making request: %v", err)
 	}
@@ -52,12 +59,12 @@ func GenerateCompletion(model, prompt string, temperature float64) error {
 }
 
 // GenerateStreamingCompletion sends a streaming request
-func GenerateStreamingCompletion(model, prompt string, temperature float64) error {
+func GenerateStreamingCompletion(prompt string, config PromptConfig) error {
 	request := GenerateRequest{
-		Model:       model,
+		Model:       config.Model,
 		Prompt:      prompt,
 		Stream:      true,
-		Temperature: temperature,
+		Temperature: config.Temperature,
 	}
 
 	jsonData, err := json.Marshal(request)
@@ -65,7 +72,7 @@ func GenerateStreamingCompletion(model, prompt string, temperature float64) erro
 		return fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := http.Post("http://localhost:11434/api/generate", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(config.URL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("error making request: %v", err)
 	}

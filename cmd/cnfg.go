@@ -14,7 +14,7 @@ import (
 	"github.com/lordofthemind/gollama/utils"
 )
 
-const defaultOllamaURL = "http://localhost:11434/"
+const defaultOllamaURL = "http://localhost:11434/api/generate"
 
 var (
 	tempFlag   float64
