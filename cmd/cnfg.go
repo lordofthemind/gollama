@@ -111,9 +111,9 @@ var cnfgCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(cnfgCmd)
-	cnfgCmd.Flags().StringVarP(&pModelFlag, "pmodel", "p", "", "Primary model name")
-	cnfgCmd.Flags().StringVarP(&sModelFlag, "smodel", "s", "", "Secondary model name")
-	cnfgCmd.Flags().StringVarP(&tModelFlag, "tmodel", "e", "", "Tertiary model name")
+	cnfgCmd.Flags().StringVarP(&pModelFlag, "primary", "p", "", "Primary model name")
+	cnfgCmd.Flags().StringVarP(&sModelFlag, "secondary", "s", "", "Secondary model name")
+	cnfgCmd.Flags().StringVarP(&tModelFlag, "tertiary", "e", "", "Tertiary model name")
 	cnfgCmd.Flags().Float64VarP(&tempFlag, "temp", "t", 0.5, "Temperature setting for the model (0.1 to 1.0)")
 
 	// Here you will define your flags and configuration settings.
