@@ -3,7 +3,7 @@
 ├── Readme.md
 ├── build
 ├── cmd
-│   ├── config.go
+│   ├── cnfg.go
 │   ├── init.go
 │   ├── root.go
 │   └── updt.go
@@ -17,6 +17,7 @@
 ├── services
 ├── tree.txt
 └── utils
-    └── ConfigUtils.go
+    ├── CnfgUtils.go
+    └── UpdtUtils.go
 
-6 directories, 14 files
+6 directories, 15 files
