@@ -37,7 +37,7 @@ var cnfgCmd = &cobra.Command{
 
 		// Check if config file exists; if not, create it with full setup
 		if !config.SetupCompleted {
-			initiateSetup(&config, configPath)
+			initiateGlobalConfigurationSetup(&config, configPath)
 			return
 		}
 
@@ -48,7 +48,7 @@ var cnfgCmd = &cobra.Command{
 			configs.DisplayGlobalConfig(config)
 			fmt.Print("Do you want to edit the configuration? (y/n): ")
 			if utils.ReadInput(bufio.NewReader(os.Stdin)) == "y" {
-				initiateSetup(&config, configPath)
+				initiateGlobalConfigurationSetup(&config, configPath)
 			} else {
 				fmt.Println("No changes made to the configuration.")
 			}
@@ -128,7 +128,7 @@ func init() {
 }
 
 // Main setup function for initial or reconfiguration
-func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
+func initiateGlobalConfigurationSetup(config *configs.GollamaGlobalConfig, configPath string) {
 	if !utils.CheckOllamaInstallation() {
 		return
 	}
@@ -182,7 +182,7 @@ func initiateSetup(config *configs.GollamaGlobalConfig, configPath string) {
 			break
 		} else if confirmation == "n" {
 			fmt.Println("Let's re-enter the details.")
-			initiateSetup(config, configPath)
+			initiateGlobalConfigurationSetup(config, configPath)
 			break
 		} else {
 			fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
