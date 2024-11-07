@@ -129,10 +129,6 @@ func init() {
 
 // Main setup function for initial or reconfiguration
 func initiateGlobalConfigurationSetup(config *configs.GollamaGlobalConfig, configPath string) {
-	if !utils.CheckOllamaInstallation() {
-		return
-	}
-
 	models, err := utils.GetOllamaModels()
 	if err != nil {
 		fmt.Println("Error retrieving models from Ollama:", err)
