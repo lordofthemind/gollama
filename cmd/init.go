@@ -40,9 +40,10 @@ If no project name is specified, it defaults to the parent directory name or pro
 		configDir := filepath.Join(".", ".gollama")
 		configPath := filepath.Join(configDir, "gollama.yaml")
 
-		// Check if the configuration directory exists, if not, create it
-		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
-			fmt.Println("Error creating configuration directory:", err)
+		// Check if configuration already exists using LoadWorkspaceConfig
+		if _, _, err := configs.LoadWorkspaceConfig(); err == nil {
+			fmt.Println("Configuration already exists at", configPath)
+			fmt.Println("Use a different directory or delete the existing configuration if you want to reinitialize.")
 			return
 		}
 
@@ -57,16 +58,6 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 
 	initCmd.Flags().StringVarP(&projectNameFlag, "project", "p", "", "Project name for the new Gollama workspace")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // Main setup function for the workspace configuration
