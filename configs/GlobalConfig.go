@@ -35,9 +35,9 @@ func LoadGlobalConfig() (GollamaGlobalConfig, string, error) {
 
 		// Set the default config path based on the OS
 		if runtime.GOOS == "windows" {
-			configPath = filepath.Join(homeDir, "AppData", "Roaming", "gollama", "gollama.yaml") // Windows
+			configPath = filepath.Join(homeDir, "AppData", "Roaming", "Gollama", "gollama.yaml")
 		} else {
-			configPath = filepath.Join(homeDir, ".config", "gollama", "gollama.yaml") // Linux/Mac
+			configPath = filepath.Join(homeDir, ".config", "Gollama", "gollama.yaml")
 		}
 	}
 
