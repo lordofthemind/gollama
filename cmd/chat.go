@@ -32,6 +32,7 @@ By default, it uses streaming mode with the primary model from the configuration
 		useAllModels, _ := cmd.Flags().GetBool("all")
 		models := []string{}
 		var selectedModel string
+		var modelLocked bool // Tracks if a specific model has been locked after the first response
 
 		if useAllModels {
 			// Use all models if -a/--all flag is set
@@ -56,13 +57,14 @@ By default, it uses streaming mode with the primary model from the configuration
 		}
 
 		// Begin interactive chat session
-		chatLoop(cmd, models, selectedModel, prompt)
+		chatLoop(cmd, models, &selectedModel, &modelLocked, prompt)
 	},
 }
 
-func chatLoop(cmd *cobra.Command, models []string, selectedModel, prompt string) {
+func chatLoop(cmd *cobra.Command, models []string, selectedModel *string, modelLocked *bool, prompt string) {
 	// Initialize reader for interactive input
 	reader := bufio.NewReader(os.Stdin)
+	firstResponse := true
 
 	// Recursive interactive loop
 	for {
@@ -79,73 +81,104 @@ func chatLoop(cmd *cobra.Command, models []string, selectedModel, prompt string)
 			break
 		}
 
-		// Handle model selection if using all models
-		if len(models) > 1 && selectedModel == "" {
-			fmt.Println("Available models:")
-			for i, model := range models {
-				fmt.Printf("[%d] %s\n", i+1, model)
-			}
-			fmt.Print("Select model to continue with (e.g., 1, 2, 3): ")
+		// Display responses from all models initially and ask user to select one
+		if len(models) > 1 && firstResponse {
+			firstResponse = false                         // Set firstResponse to false after the initial response
+			displayResponsesFromAllModels(models, prompt) // Show initial responses from all models
+
+			// Prompt user to choose a model for further responses
+			fmt.Println("Do you want to continue with a specific model, or receive responses from all models?")
+			fmt.Println("[1] Continue with Primary Model")
+			fmt.Println("[2] Continue with Secondary Model")
+			fmt.Println("[3] Continue with Tertiary Model")
+			fmt.Println("[A] Continue with All Models")
+
+			fmt.Print("Choose an option (1, 2, 3, A): ")
 			choice, _ := reader.ReadString('\n')
 			choice = strings.TrimSpace(choice)
 
-			// Validate choice and set selectedModel
-			idx := -1
-			if n, err := fmt.Sscanf(choice, "%d", &idx); err == nil && n == 1 && idx >= 1 && idx <= len(models) {
-				selectedModel = models[idx-1]
-			} else {
-				fmt.Println("Invalid choice. Please select a valid model number.")
-				continue
+			// Handle user choice to lock a model or continue with all
+			switch choice {
+			case "1":
+				*selectedModel = models[0]
+				*modelLocked = true
+			case "2":
+				*selectedModel = models[1]
+				*modelLocked = true
+			case "3":
+				*selectedModel = models[2]
+				*modelLocked = true
+			case "A", "a":
+				*selectedModel = "" // Keep responses from all models
+			default:
+				fmt.Println("Invalid choice. Continuing with responses from all models.")
 			}
+
+			// After selecting a model, wait for the next user prompt
+			prompt = ""
+			continue
 		}
 
-		// Create a new context and API client
-		ctx := context.Background()
-		client, err := api.ClientFromEnvironment()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// Set up the request with the selected model and prompt
-		promptConfig := &api.GenerateRequest{
-			Model:  selectedModel,
-			Prompt: prompt,
-		}
-
-		// Check response mode and call appropriate function
-		responseMode, _ := cmd.Flags().GetBool("response")
-		if responseMode {
-			// Non-streaming mode
-			promptConfig.Stream = new(bool) // Non-streaming if false
-			err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
-				fmt.Println("Gollama:", resp.Response)
-				return nil
-			})
-		} else {
-			// Streaming mode
-			var responseBuilder strings.Builder
-			firstChunk := true
-			err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
-				// Only print "Gollama:" label once at the beginning
-				if firstChunk {
-					fmt.Print("Gollama: ")
-					firstChunk = false
-				}
-				// Append each chunk of response text to the builder
-				responseBuilder.WriteString(resp.Response)
-				fmt.Print(resp.Response) // Print chunk directly
-				return nil
-			})
-			fmt.Println() // Ensure a newline after the streaming response
-		}
-
-		if err != nil {
-			fmt.Printf("Error generating response from model %s: %v\n", selectedModel, err)
+		// Generate response based on model selection for subsequent prompts
+		if *selectedModel != "" { // Specific model selected
+			displayResponseFromModel(*selectedModel, prompt, cmd)
+		} else { // All models selected
+			displayResponsesFromAllModels(models, prompt)
 		}
 
 		// Reset prompt for next user input and continue the loop
 		prompt = ""
 	}
+}
+
+func displayResponseFromModel(model, prompt string, cmd *cobra.Command) {
+	ctx := context.Background()
+	client, err := api.ClientFromEnvironment()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set up the request with the selected model and prompt
+	promptConfig := &api.GenerateRequest{
+		Model:  model,
+		Prompt: prompt,
+	}
+
+	// Check response mode only if cmd is not nil
+	responseMode := false
+	if cmd != nil {
+		responseMode, _ = cmd.Flags().GetBool("response")
+	}
+
+	if responseMode {
+		// Non-streaming mode
+		promptConfig.Stream = new(bool) // Non-streaming if false
+		err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
+			fmt.Println("Gollama:", resp.Response)
+			return nil
+		})
+	} else {
+		// Streaming mode
+		fmt.Print("Gollama: ")
+		err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
+			fmt.Print(resp.Response)
+			return nil
+		})
+		fmt.Println()
+	}
+
+	if err != nil {
+		fmt.Printf("Error generating response from model %s: %v\n", model, err)
+	}
+}
+
+func displayResponsesFromAllModels(models []string, prompt string) {
+	fmt.Println("Gollama Responses from All Models:")
+	for _, model := range models {
+		fmt.Printf("\n[%s]:\n", model)
+		displayResponseFromModel(model, prompt, nil) // Pass nil for cmd here
+	}
+	fmt.Println()
 }
 
 func init() {
