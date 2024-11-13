@@ -11,7 +11,6 @@ import (
 // GollamaConfig represents the combined configuration structure
 type GollamaConfig struct {
 	ProjectName    string  `mapstructure:"project_name"`
-	OllamaURL      string  `mapstructure:"ollama_url"`
 	PrimaryModel   string  `mapstructure:"primary_model"`
 	SecondaryModel string  `mapstructure:"secondary_model"`
 	TertiaryModel  string  `mapstructure:"tertiary_model"`
@@ -50,9 +49,6 @@ func LoadConfig() (GollamaConfig, error) {
 	if config.ProjectName == "" {
 		config.ProjectName = globalConfig.ProjectName
 	}
-	if config.OllamaURL == "" {
-		config.OllamaURL = globalConfig.OllamaURL
-	}
 	if config.PrimaryModel == "" {
 		config.PrimaryModel = globalConfig.PrimaryModel
 	}
@@ -85,9 +81,9 @@ func loadGlobalConfigOnly() (GollamaConfig, string, error) {
 
 		// Set the default config path based on the OS
 		if runtime.GOOS == "windows" {
-			configPath = filepath.Join(homeDir, "AppData", "Roaming", "gollama", "gollama.yaml") // Windows
+			configPath = filepath.Join(homeDir, "AppData", "Roaming", "Gollama", "gollama.yaml") // Windows
 		} else {
-			configPath = filepath.Join(homeDir, ".config", "gollama", "gollama.yaml") // Linux/Mac
+			configPath = filepath.Join(homeDir, ".config", "Gollama", "gollama.yaml") // Linux/Mac
 		}
 	}
 

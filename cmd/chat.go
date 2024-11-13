@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
+	"github.com/ollama/ollama/api"
 	"github.com/spf13/cobra"
 
 	"github.com/lordofthemind/gollama/configs"
-	"github.com/lordofthemind/gollama/services"
 )
 
 // chatCmd represents the chat command
@@ -24,21 +27,22 @@ By default, it uses streaming mode with the primary model from the configuration
 			os.Exit(1)
 		}
 
-		// Determine the model to use based on flags
-		var model string
-		if useSecondary, _ := cmd.Flags().GetBool("secondary"); useSecondary {
-			model = config.SecondaryModel
-		} else if useTertiary, _ := cmd.Flags().GetBool("tertiary"); useTertiary {
-			model = config.TertiaryModel
-		} else {
-			model = config.PrimaryModel
-		}
+		// Determine the model(s) to use based on flags
+		useAllModels, _ := cmd.Flags().GetBool("all")
+		models := []string{}
 
-		// Set up the PromptConfig struct with model, temperature, and URL
-		promptConfig := services.PromptConfig{
-			Model:       model,
-			Temperature: config.Temperature,
-			URL:         config.OllamaURL,
+		if useAllModels {
+			// Use all models if -a/--all flag is set
+			models = append(models, config.PrimaryModel, config.SecondaryModel, config.TertiaryModel)
+		} else {
+			// Select single model based on flag precedence
+			if useSecondary, _ := cmd.Flags().GetBool("secondary"); useSecondary {
+				models = append(models, config.SecondaryModel)
+			} else if useTertiary, _ := cmd.Flags().GetBool("tertiary"); useTertiary {
+				models = append(models, config.TertiaryModel)
+			} else {
+				models = append(models, config.PrimaryModel)
+			}
 		}
 
 		// Ensure a prompt is provided
@@ -46,21 +50,46 @@ By default, it uses streaming mode with the primary model from the configuration
 			fmt.Println("Please provide a prompt for the chat command.")
 			return
 		}
-		prompt := args[0]
+		prompt := strings.Join(args, " ")
 
-		// Determine response mode based on flag and call appropriate function
-		if responseMode, _ := cmd.Flags().GetBool("response"); responseMode {
-			// Non-streaming mode
-			err := services.GenerateCompletion(prompt, promptConfig)
+		// Execute response generation for each selected model
+		for _, model := range models {
+			fmt.Printf("Response from model %s:\n", model)
+
+			// Set up the context and prompt configuration
+			ctx := context.Background()
+			client, err := api.ClientFromEnvironment()
 			if err != nil {
-				fmt.Printf("Error in completion generation: %v\n", err)
+				log.Fatal(err)
 			}
-		} else {
-			// Default to streaming mode
-			err := services.GenerateStreamingCompletion(prompt, promptConfig)
+			promptConfig := &api.GenerateRequest{
+				Model:  model,
+				Prompt: prompt,
+			}
+
+			// Check response mode and call appropriate function
+			responseMode, _ := cmd.Flags().GetBool("response")
+			if responseMode {
+				// Non-streaming mode
+				promptConfig.Stream = new(bool) // Non-streaming if false
+				err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
+					fmt.Println(resp.Response)
+					return nil
+				})
+			} else {
+				// Streaming mode
+				err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
+					fmt.Print(resp.Response)
+					return nil
+				})
+			}
+
 			if err != nil {
-				fmt.Printf("Error in streaming completion generation: %v\n", err)
+				fmt.Printf("Error generating response from model %s: %v\n", model, err)
 			}
+
+			// Add newline to separate responses if multiple models are used
+			fmt.Println()
 		}
 	},
 }
@@ -72,4 +101,5 @@ func init() {
 	chatCmd.Flags().BoolP("response", "r", false, "Use non-streaming mode")
 	chatCmd.Flags().BoolP("secondary", "s", false, "Use secondary model")
 	chatCmd.Flags().BoolP("tertiary", "t", false, "Use tertiary model")
+	chatCmd.Flags().BoolP("all", "a", false, "Use all models")
 }

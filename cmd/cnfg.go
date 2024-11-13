@@ -14,8 +14,6 @@ import (
 	"github.com/lordofthemind/gollama/utils"
 )
 
-const defaultOllamaURL = "http://localhost:11434/api/generate"
-
 var (
 	tempFlag   float64
 	pModelFlag string
@@ -115,16 +113,6 @@ func init() {
 	cnfgCmd.Flags().StringVarP(&sModelFlag, "secondary", "s", "", "Secondary model name")
 	cnfgCmd.Flags().StringVarP(&tModelFlag, "tertiary", "e", "", "Tertiary model name")
 	cnfgCmd.Flags().Float64VarP(&tempFlag, "temp", "t", 0.5, "Temperature setting for the model (0.1 to 1.0)")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// cnfgCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// cnfgCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // Main setup function for initial or reconfiguration
@@ -138,11 +126,6 @@ func initiateGlobalConfigurationSetup(config *configs.GollamaGlobalConfig, confi
 	reader := bufio.NewReader(os.Stdin)
 	if !config.SetupCompleted {
 		fmt.Println("Initial setup required. Please provide the following details:")
-	}
-	fmt.Printf("Enter Ollama URL (default: %s): ", defaultOllamaURL)
-	config.OllamaURL = utils.ReadInput(reader)
-	if config.OllamaURL == "" {
-		config.OllamaURL = defaultOllamaURL
 	}
 
 	fmt.Println("Available models:")

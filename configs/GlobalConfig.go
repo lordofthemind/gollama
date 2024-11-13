@@ -7,11 +7,11 @@ import (
 	"runtime"
 
 	"github.com/spf13/viper"
+
 )
 
 // GollamaGlobalConfig represents the structure of the configuration file
 type GollamaGlobalConfig struct {
-	OllamaURL      string  `mapstructure:"ollama_url"`
 	PrimaryModel   string  `mapstructure:"primary_model"`
 	SecondaryModel string  `mapstructure:"secondary_model"`
 	TertiaryModel  string  `mapstructure:"tertiary_model"`
@@ -46,7 +46,6 @@ func LoadGlobalConfig() (GollamaGlobalConfig, string, error) {
 		fmt.Println("Configuration file not found, creating a new one with default values...")
 
 		// Set default values
-		config.OllamaURL = ""
 		config.PrimaryModel = ""
 		config.SecondaryModel = ""
 		config.TertiaryModel = ""
@@ -78,7 +77,6 @@ func LoadGlobalConfig() (GollamaGlobalConfig, string, error) {
 // SaveConfig saves the configuration to the specified path
 func SaveGlobalConfig(config GollamaGlobalConfig, configPath string) error {
 	// Set config values in Viper
-	viper.Set("ollama_url", config.OllamaURL)
 	viper.Set("primary_model", config.PrimaryModel)
 	viper.Set("secondary_model", config.SecondaryModel)
 	viper.Set("tertiary_model", config.TertiaryModel)
@@ -98,7 +96,6 @@ func SaveGlobalConfig(config GollamaGlobalConfig, configPath string) error {
 // DisplayGlobalConfig prints the current configuration from the file
 func DisplayGlobalConfig(config GollamaGlobalConfig) {
 	fmt.Println("Current Global Configuration:")
-	fmt.Printf("Ollama URL: %s\n", config.OllamaURL)
 	fmt.Printf("Temperature: %.2f\n", config.Temperature)
 	fmt.Printf("Primary Model: %s\n", config.PrimaryModel)
 	fmt.Printf("Secondary Model: %s\n", config.SecondaryModel)
