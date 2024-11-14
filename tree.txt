@@ -1,5 +1,6 @@
 .
 ├── LICENSE
+├── Makefile
 ├── Readme.md
 ├── build
 ├── cmd
@@ -10,6 +11,7 @@
 │   └── updt.go
 ├── configs
 │   ├── GlobalConfig.go
+│   ├── LoadConfig.go
 │   └── WorkspaceConfig.go
 ├── go.mod
 ├── go.sum
@@ -19,6 +21,7 @@
 ├── tree.txt
 └── utils
     ├── CnfgUtils.go
+    ├── RootUtils.go
     └── UpdtUtils.go
 
-6 directories, 16 files
+6 directories, 19 files

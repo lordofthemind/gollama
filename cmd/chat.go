@@ -53,7 +53,7 @@ By default, it uses streaming mode with the primary model from the configuration
 		// Set initial prompt from args or go into interactive mode if no prompt provided
 		prompt := strings.Join(args, " ")
 		if prompt == "" {
-			fmt.Println("Interactive mode activated. Start chatting below:")
+			fmt.Printf("Interactive mode activated with model: %s. Start chatting below:\n", selectedModel)
 		}
 
 		// Begin interactive chat session
@@ -121,6 +121,7 @@ func chatLoop(cmd *cobra.Command, models []string, selectedModel *string, modelL
 
 		// Generate response based on model selection for subsequent prompts
 		if *selectedModel != "" { // Specific model selected
+			fmt.Printf("Gollama [%s]: ", *selectedModel) // Display model name
 			displayResponseFromModel(*selectedModel, prompt, cmd)
 		} else { // All models selected
 			displayResponsesFromAllModels(models, prompt)
@@ -154,12 +155,11 @@ func displayResponseFromModel(model, prompt string, cmd *cobra.Command) {
 		// Non-streaming mode
 		promptConfig.Stream = new(bool) // Non-streaming if false
 		err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
-			fmt.Println("Gollama:", resp.Response)
+			fmt.Println(resp.Response)
 			return nil
 		})
 	} else {
 		// Streaming mode
-		fmt.Print("Gollama: ")
 		err = client.Generate(ctx, promptConfig, func(resp api.GenerateResponse) error {
 			fmt.Print(resp.Response)
 			return nil

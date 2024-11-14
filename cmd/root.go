@@ -19,6 +19,14 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// If no subcommand is specified, default to running the chat command
+		if len(args) == 0 {
+			chatCmd.Run(cmd, args)
+		} else {
+			fmt.Println("Command not recognized. Use gollama --help for a list of commands.")
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -32,6 +40,11 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.AddCommand(chatCmd) // Add chat command as a subcommand
+	rootCmd.AddCommand(cnfgCmd) // Add other commands here
+	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(updtCmd)
+
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		// Ensure Ollama is installed
 		if !utils.CheckOllamaInstallation() {
