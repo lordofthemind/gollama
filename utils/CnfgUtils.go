@@ -6,18 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-
 )
-
-// Function to check if `ollama` is installed
-func CheckOllamaInstallation() bool {
-	_, err := exec.LookPath("ollama")
-	if err != nil {
-		fmt.Println("Ollama is not installed. Please install Ollama to proceed with Gollama setup.")
-		return false
-	}
-	return true
-}
 
 // Function to retrieve models available in `ollama`
 func GetOllamaModels() ([]string, error) {

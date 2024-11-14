@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"github.com/spf13/viper"
-
 )
 
 // GollamaGlobalConfig represents the structure of the configuration file
@@ -16,6 +15,7 @@ type GollamaGlobalConfig struct {
 	SecondaryModel string  `mapstructure:"secondary_model"`
 	TertiaryModel  string  `mapstructure:"tertiary_model"`
 	Temperature    float64 `mapstructure:"temperature"`
+	Logging        bool    `mapstructure:"logging"`
 	SetupCompleted bool    `mapstructure:"setup_completed"`
 }
 
