@@ -4,24 +4,14 @@
 ├── Readme.md
 ├── build
 ├── cmd
-│   ├── chat.go
-│   ├── cnfg.go
-│   ├── init.go
-│   ├── root.go
-│   └── updt.go
+│   └── root.go
 ├── configs
-│   ├── GlobalConfig.go
-│   ├── LoadConfig.go
-│   └── WorkspaceConfig.go
 ├── go.mod
 ├── go.sum
 ├── gollama.go.tpl
+├── helpers
 ├── main.go
-├── tree.txt
-└── utils
-    ├── ChatUtils.go
-    ├── CnfgUtils.go
-    ├── RootUtils.go
-    └── UpdtUtils.go
+├── services
+└── tree.txt
 
-5 directories, 20 files
+6 directories, 9 files
