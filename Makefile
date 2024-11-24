@@ -14,15 +14,15 @@ all: build
 
 # Build the application for specific platforms
 build_win: ## Build for Windows
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/win/$(APP_NAME).exe ./main.go
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/win/$(APP_NAME).exe ./gollama.go
 
 build_lin: ## Build for Linux
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/linux/$(APP_NAME) ./main.go
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/linux/$(APP_NAME) ./gollama.go
 
 build_mac: ## Build for MacOS
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/mac/$(APP_NAME) ./main.go
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/mac/$(APP_NAME) ./gollama.go
 
-# Build gollama for all platforms
+# Build ggollama for all platforms
 build: ## Build both gollama for all platforms and save in the build folder
 	$(MAKE) build_lin
 	$(MAKE) build_win
