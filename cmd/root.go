@@ -7,6 +7,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	Config     string
+	ConfigPath string
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gollama",
@@ -23,6 +28,12 @@ var rootCmd = &cobra.Command{
 		}
 		if !services.EnsureOllamaIsRunning() {
 			fmt.Println("Exiting due to failure in starting Ollama.")
+			return
+		}
+		// Load configuration and path
+		Config, ConfigPath, err := services.LoadConfig()
+		if err != nil {
+			fmt.Println("Error loading configuration:", err)
 			return
 		}
 	},

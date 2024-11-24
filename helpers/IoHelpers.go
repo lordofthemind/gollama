@@ -13,17 +13,25 @@ func NewReader() *bufio.Reader {
 	return bufio.NewReader(os.Stdin)
 }
 
-// PromptForTemperature prompts the user for a temperature input and ensures it is within the valid range
+// PromptForTemperature prompts the user for a temperature with default value
 func PromptForTemperature(prompt string) float64 {
-	for {
-		fmt.Print(prompt)
-		input := ReadInput(nil) // Read user input
-		temp, err := strconv.ParseFloat(input, 64)
-		if err == nil && temp >= 0.1 && temp <= 1.0 {
-			return temp
-		}
-		fmt.Println("Invalid input. Please enter a valid temperature between 0.1 and 1.0.")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(prompt + " (default: 0.4): ")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+
+	// Use default temperature if input is empty
+	if input == "" {
+		return 0.4
 	}
+
+	temp, err := strconv.ParseFloat(input, 64)
+	if err != nil || temp < 0.1 || temp > 1.0 {
+		fmt.Println("Invalid temperature. It must be a number between 0.1 and 1.0. Please try again.")
+		return PromptForTemperature(prompt)
+	}
+
+	return temp
 }
 
 // ReadInput reads input from the user

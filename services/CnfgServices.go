@@ -63,7 +63,11 @@ func UpdateConfigFromFlags(config *configs.GollamaGlobalConfig, temp float64, pM
 
 	updated := false
 
-	if temp != 0.5 {
+	if temp != 0.0 {
+		if temp < 0.1 || temp > 1.0 {
+			fmt.Println("Temperature must be between 0.1 and 1.0.")
+			return false
+		}
 		config.Primary.Temp = temp
 		config.Secondary.Temp = temp
 		config.Tertiary.Temp = temp
