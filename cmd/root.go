@@ -1,38 +1,38 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
-	"os"
+	"fmt"
 
+	"github.com/lordofthemind/gollama/services"
 	"github.com/spf13/cobra"
 )
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gollama",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "A CLI wrapper for Ollama",
+	Long:  "Gollama is a CLI tool that ensures Ollama is properly installed, running, and configured.",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Pre-run checks for all commands
+		if !services.IsOllamaInstalled() {
+			fmt.Println("Exiting due to missing Ollama installation.")
+			return
+		}
+		if !services.EnsureOllamaIsRunning() {
+			fmt.Println("Exiting due to failure in starting Ollama.")
+			return
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
 	}
 }
 
@@ -47,5 +47,3 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-
