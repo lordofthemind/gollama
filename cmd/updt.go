@@ -17,8 +17,18 @@ var updtCmd = &cobra.Command{
 	Use:   "updt",
 	Short: "Update models in the Ollama installation",
 	Long: `The updt command allows you to update one or more models in the Ollama installation.
-Use the --all flag to update all models, or the --model flag to update a specific model.
-If no flag is provided, you will be prompted to select models to update.`,
+
+Key Features:
+- Update all models using the '--all' flag for a complete refresh.
+- Update a specific model using the '--model' flag with the model's name.
+- Interactive selection mode if no flags are provided, enabling you to choose which models to update.
+- Seamlessly integrates with Ollama's list and pull commands for efficient updates.
+
+Usage:
+- Run 'updt' without any flags to launch the interactive update mode.
+- Use '--all' or '-a' to update all models in one go.
+- Use '--model <model-name>' or '-m <model-name>' to update a specific model directly.`,
+
 	Run: func(cmd *cobra.Command, args []string) {
 		err := handleUpdateCommand()
 		if err != nil {
