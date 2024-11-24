@@ -54,7 +54,11 @@ func SelectModelWithTemperature(config *configs.GollamaGlobalConfig) {
 }
 
 // UpdateConfigFromFlags updates the configuration based on CLI flags
-func UpdateConfigFromFlags(config *configs.GollamaGlobalConfig, temp float64, pModel, sModel, tModel string) bool {
+func UpdateConfigFromFlags(
+	config *configs.GollamaGlobalConfig,
+	primaryTemp, secondaryTemp, tertiaryTemp float64,
+	pModel, sModel, tModel string,
+) bool {
 	models, err := helpers.GetOllamaModels()
 	if err != nil {
 		fmt.Println("Error retrieving models:", err)
@@ -63,27 +67,49 @@ func UpdateConfigFromFlags(config *configs.GollamaGlobalConfig, temp float64, pM
 
 	updated := false
 
-	if temp != 0.0 {
-		if temp < 0.1 || temp > 1.0 {
-			fmt.Println("Temperature must be between 0.1 and 1.0.")
+	// Update primary temperature
+	if primaryTemp != 0.0 {
+		if err := helpers.ValidateTemperature(primaryTemp); err != nil {
+			fmt.Println("Error:", err)
 			return false
 		}
-		config.Primary.Temp = temp
-		config.Secondary.Temp = temp
-		config.Tertiary.Temp = temp
+		config.Primary.Temp = primaryTemp
 		updated = true
 	}
 
+	// Update secondary temperature
+	if secondaryTemp != 0.0 {
+		if err := helpers.ValidateTemperature(secondaryTemp); err != nil {
+			fmt.Println("Error:", err)
+			return false
+		}
+		config.Secondary.Temp = secondaryTemp
+		updated = true
+	}
+
+	// Update tertiary temperature
+	if tertiaryTemp != 0.0 {
+		if err := helpers.ValidateTemperature(tertiaryTemp); err != nil {
+			fmt.Println("Error:", err)
+			return false
+		}
+		config.Tertiary.Temp = tertiaryTemp
+		updated = true
+	}
+
+	// Update primary model
 	if pModel != "" && helpers.ValidateModel(pModel, models) {
 		config.Primary.Model = pModel
 		updated = true
 	}
 
+	// Update secondary model
 	if sModel != "" && helpers.ValidateModel(sModel, models) {
 		config.Secondary.Model = sModel
 		updated = true
 	}
 
+	// Update tertiary model
 	if tModel != "" && helpers.ValidateModel(tModel, models) {
 		config.Tertiary.Model = tModel
 		updated = true

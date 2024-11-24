@@ -10,13 +10,14 @@ import (
 )
 
 var (
-	tempFlag   float64
-	pModelFlag string
-	sModelFlag string
-	tModelFlag string
+	primaryTempFlag    float64
+	secondaryTempFlag  float64
+	tertiaryTempFlag   float64
+	primaryModelFlag   string
+	secondaryModelFlag string
+	tertiaryModelFlag  string
 )
 
-// cnfgCmd represents the configuration management command
 var cnfgCmd = &cobra.Command{
 	Use:   "cnfg",
 	Short: "Manage the application configuration",
@@ -30,7 +31,9 @@ var cnfgCmd = &cobra.Command{
 		}
 
 		// If no flags are provided, display the current configuration and prompt to edit
-		if !cmd.Flags().Changed("temp") && !cmd.Flags().Changed("primary") && !cmd.Flags().Changed("secondary") && !cmd.Flags().Changed("tertiary") {
+		if !cmd.Flags().Changed("primary-temp") && !cmd.Flags().Changed("secondary-temp") &&
+			!cmd.Flags().Changed("tertiary-temp") && !cmd.Flags().Changed("primary") &&
+			!cmd.Flags().Changed("secondary") && !cmd.Flags().Changed("tertiary") {
 			services.DisplayConfig(Config)
 			if helpers.ConfirmAction("Do you want to edit the current configuration? (y/n): ") {
 				startConfigurationSetup(&Config, ConfigPath)
@@ -39,7 +42,7 @@ var cnfgCmd = &cobra.Command{
 		}
 
 		// If flags are provided, update the configuration
-		updated := services.UpdateConfigFromFlags(&Config, tempFlag, pModelFlag, sModelFlag, tModelFlag)
+		updated := services.UpdateConfigFromFlags(&Config, primaryTempFlag, secondaryTempFlag, tertiaryTempFlag, primaryModelFlag, secondaryModelFlag, tertiaryModelFlag)
 		if updated {
 			if err := services.SaveConfig(Config, ConfigPath); err != nil {
 				fmt.Println("Error saving updated configuration:", err)
@@ -81,8 +84,10 @@ func init() {
 	rootCmd.AddCommand(cnfgCmd)
 
 	// Define flags for the command
-	cnfgCmd.Flags().Float64VarP(&tempFlag, "temp", "t", 0.0, "Set the model temperature (0.1-1.0)")
-	cnfgCmd.Flags().StringVarP(&pModelFlag, "primary", "p", "", "Set the primary model")
-	cnfgCmd.Flags().StringVarP(&sModelFlag, "secondary", "s", "", "Set the secondary model")
-	cnfgCmd.Flags().StringVarP(&tModelFlag, "tertiary", "e", "", "Set the tertiary model")
+	cnfgCmd.Flags().StringVarP(&primaryModelFlag, "primary", "p", "", "Set the primary model")
+	cnfgCmd.Flags().StringVarP(&secondaryModelFlag, "secondary", "s", "", "Set the secondary model")
+	cnfgCmd.Flags().StringVarP(&tertiaryModelFlag, "tertiary", "t", "", "Set the tertiary model")
+	cnfgCmd.Flags().Float64VarP(&primaryTempFlag, "primary-temp", "q", 0.0, "Set the primary model temperature (0.1-1.0)")
+	cnfgCmd.Flags().Float64VarP(&secondaryTempFlag, "secondary-temp", "w", 0.0, "Set the secondary model temperature (0.1-1.0)")
+	cnfgCmd.Flags().Float64VarP(&tertiaryTempFlag, "tertiary-temp", "e", 0.0, "Set the tertiary model temperature (0.1-1.0)")
 }

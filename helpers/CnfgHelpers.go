@@ -55,3 +55,11 @@ func ValidateModel(model string, models []string) bool {
 	fmt.Printf("Model '%s' is not available.\n", model)
 	return false
 }
+
+// ValidateTemperature validates if the given temperature is within the allowed range
+func ValidateTemperature(temp float64) error {
+	if temp < 0.1 || temp > 1.0 {
+		return fmt.Errorf("temperature must be between 0.1 and 1.0")
+	}
+	return nil
+}
