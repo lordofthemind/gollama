@@ -19,8 +19,9 @@ var (
 )
 
 var cnfgCmd = &cobra.Command{
-	Use:   "cnfg",
-	Short: "Manage Gollama's configuration",
+	Use:     "cnfg",
+	Aliases: []string{"cfg", "config", "configuration"},
+	Short:   "Manage Gollama's configuration",
 	Long: `The cnfg command allows you to view and manage Gollama's configuration, including models and temperature settings.
 
 Key Features:

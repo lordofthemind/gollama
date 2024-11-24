@@ -13,11 +13,17 @@ var (
 	ConfigPath string
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gollama",
-	Short: "A CLI wrapper for Ollama",
-	Long:  "Gollama is a CLI tool that ensures Ollama is properly installed, running, and configured.",
+	Use:     "gollama",             // Main command name
+	Aliases: []string{"gl", "glm"}, // Alias for the main command (so 'gl' can be used instead of 'gollama')
+	Short:   "A CLI wrapper for Ollama",
+	Long:    "Gollama is a CLI tool that ensures Ollama is properly installed, running, and configured.",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Default action when no subcommand is passed, invoke 'chatCmd'
+		// fmt.Println("Running the default action (chat)...")
+		// Directly call the chatCmd's Run method
+		chatCmd.Run(cmd, args)
+	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Pre-run checks for all commands
 		if !services.IsOllamaInstalled() {
@@ -55,4 +61,7 @@ func Execute() {
 func init() {
 	// Initialize persistent flags or other settings for rootCmd if needed
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// Add other subcommands to the root command
+	// Example: rootCmd.AddCommand(updtCmd)  // Add your subcommands here
 }

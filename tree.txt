@@ -3,6 +3,12 @@
 ├── Makefile
 ├── Readme.md
 ├── builds
+│   ├── linux
+│   │   └── gollama
+│   ├── mac
+│   │   └── gollama
+│   └── win
+│       └── gollama.exe
 ├── cmd
 │   ├── chat.go
 │   ├── cnfg.go
@@ -14,6 +20,7 @@
 ├── go.sum
 ├── gollama.go.tpl
 ├── helpers
+│   ├── ChatHelpers.go
 │   ├── CnfgHelpers.go
 │   ├── IoHelpers.go
 │   ├── PathHelper.go
@@ -21,9 +28,10 @@
 │   └── UpdtHelpers.go
 ├── main.go
 ├── services
+│   ├── ChatServices.go
 │   ├── CnfgServices.go
 │   ├── RootServices.go
 │   └── UpdtServices.go
 └── tree.txt
 
-6 directories, 21 files
+9 directories, 26 files
