@@ -20,8 +20,19 @@ var (
 
 var cnfgCmd = &cobra.Command{
 	Use:   "cnfg",
-	Short: "Manage the application configuration",
-	Long:  "The cnfg command allows you to manage Gollama's configuration, including models and temperature settings.",
+	Short: "Manage Gollama's configuration",
+	Long: `The cnfg command allows you to view and manage Gollama's configuration, including models and temperature settings.
+
+Key Features:
+- View the current configuration if no flags are provided.
+- Update the primary, secondary, and tertiary models and their respective temperature settings via flags.
+- Interactive configuration setup to guide users through selecting models and temperatures.
+- Automatically saves changes if confirmed by the user.
+
+Usage:
+- Run 'cnfg' without flags to display the current configuration and optionally edit it.
+- Use flags such as '--primary', '--primary-temp', etc., to update specific values in the configuration.`,
+
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load configuration and path
 		Config, ConfigPath, err := services.LoadConfig()
