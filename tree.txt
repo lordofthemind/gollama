@@ -2,26 +2,19 @@
 ├── LICENSE
 ├── Makefile
 ├── Readme.md
-├── build
+├── builds
+│   ├── linux
+│   │   └── gollama
+│   ├── mac
+│   │   └── gollama
+│   └── win
+│       └── gollama.exe
 ├── cmd
-│   ├── chat.go
-│   ├── cnfg.go
-│   ├── init.go
-│   ├── root.go
-│   └── updt.go
-├── configs
-│   ├── GlobalConfig.go
-│   ├── LoadConfig.go
-│   └── WorkspaceConfig.go
+│   └── root.go
 ├── go.mod
 ├── go.sum
+├── gollama.go
 ├── gollama.go.tpl
-├── main.go
-├── services
-├── tree.txt
-└── utils
-    ├── CnfgUtils.go
-    ├── RootUtils.go
-    └── UpdtUtils.go
+└── tree.txt
 
-6 directories, 19 files
+6 directories, 12 files
