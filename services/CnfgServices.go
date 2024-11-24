@@ -22,29 +22,35 @@ func DisplayConfig(config configs.GollamaGlobalConfig) {
 	configs.DisplayGlobalConfig(config)
 }
 
-// SetupConfiguration runs an interactive setup for configuration
-func SetupConfiguration(config *configs.GollamaGlobalConfig, configPath string) {
+// SelectModelWithTemperature prompts the user to select models and input temperatures
+func SelectModelWithTemperature(config *configs.GollamaGlobalConfig) {
+	// Retrieve available models
 	models, err := helpers.GetOllamaModels()
 	if err != nil {
 		fmt.Println("Error retrieving models:", err)
 		return
 	}
 
-	reader := helpers.NewReader()
-
-	// Select models for Primary, Secondary, and Tertiary
-	config.Primary.Model = helpers.SelectModel(reader, models, "Select Primary Model")
-	config.Secondary.Model = helpers.SelectModel(reader, models, "Select Secondary Model")
-	config.Tertiary.Model = helpers.SelectModel(reader, models, "Select Tertiary Model")
-
-	if helpers.ConfirmAction("Confirm the configuration?") {
-		config.SetupCompleted = true
-		if err := SaveConfig(*config, configPath); err != nil {
-			fmt.Println("Error saving configuration:", err)
-		} else {
-			fmt.Println("Configuration saved successfully.")
-		}
+	// Ensure there are available models
+	if len(models) == 0 {
+		fmt.Println("No models available. Please pull models using `ollama pull <model_name>` and try again.")
+		return
 	}
+
+	// Select Primary Model
+	selectedPrimary := helpers.SelectModel(nil, models, "Select Primary Model")
+	config.Primary.Model = selectedPrimary
+	config.Primary.Temp = helpers.PromptForTemperature("Enter temperature for Primary Model (0.1-1.0): ")
+
+	// Select Secondary Model
+	selectedSecondary := helpers.SelectModel(nil, models, "Select Secondary Model")
+	config.Secondary.Model = selectedSecondary
+	config.Secondary.Temp = helpers.PromptForTemperature("Enter temperature for Secondary Model (0.1-1.0): ")
+
+	// Select Tertiary Model
+	selectedTertiary := helpers.SelectModel(nil, models, "Select Tertiary Model")
+	config.Tertiary.Model = selectedTertiary
+	config.Tertiary.Temp = helpers.PromptForTemperature("Enter temperature for Tertiary Model (0.1-1.0): ")
 }
 
 // UpdateConfigFromFlags updates the configuration based on CLI flags

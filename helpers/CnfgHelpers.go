@@ -13,7 +13,7 @@ func GetOllamaModels() ([]string, error) {
 	cmd := exec.Command("ollama", "list")
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute 'ollama list': %w", err)
 	}
 
 	lines := strings.Split(string(output), "\n")
@@ -23,12 +23,6 @@ func GetOllamaModels() ([]string, error) {
 		if len(fields) > 0 && fields[0] != "NAME" {
 			models = append(models, fields[0])
 		}
-	}
-
-	// Check if no models were found
-	if len(models) == 0 {
-		fmt.Println("No models found. You can pull models using the command:")
-		fmt.Println("  ollama pull <model_name>")
 	}
 
 	return models, nil

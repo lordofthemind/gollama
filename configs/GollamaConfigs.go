@@ -93,7 +93,6 @@ func DisplayGlobalConfig(config GollamaGlobalConfig) {
 	fmt.Println("Tertiary:")
 	fmt.Printf("  Model: %s\n", config.Tertiary.Model)
 	fmt.Printf("  Temperature: %.2f\n", config.Tertiary.Temp)
-	fmt.Printf("Setup Completed: %t\n", config.SetupCompleted)
 }
 
 // createDefaultConfig creates a default configuration
