@@ -9,12 +9,19 @@
 │   ├── root.go
 │   └── updt.go
 ├── configs
+│   └── GollamaConfigs.go
 ├── go.mod
 ├── go.sum
 ├── gollama.go.tpl
 ├── helpers
+│   ├── CnfgHelpers.go
+│   ├── IoHelpers.go
+│   ├── PathHelper.go
+│   └── RootHelpers.go
 ├── main.go
 ├── services
+│   ├── CnfgServices.go
+│   └── RootServices.go
 └── tree.txt
 
-6 directories, 12 files
+6 directories, 19 files

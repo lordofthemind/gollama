@@ -38,7 +38,7 @@ var cnfgCmd = &cobra.Command{
 				services.DisplayConfig(config)
 
 				// Confirm with the user
-				if helpers.ConfirmAction("Do you want to confirm this configuration? (y/n)") {
+				if helpers.ConfirmAction("Do you want to confirm this configuration? (y/n): ") {
 					// Save config if confirmed
 					config.SetupCompleted = true
 					if err := services.SaveConfig(config, configPath); err != nil {
