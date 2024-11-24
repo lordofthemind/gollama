@@ -2,9 +2,12 @@
 ├── LICENSE
 ├── Makefile
 ├── Readme.md
-├── build
+├── builds
 ├── cmd
-│   └── root.go
+│   ├── chat.go
+│   ├── cnfg.go
+│   ├── root.go
+│   └── updt.go
 ├── configs
 ├── go.mod
 ├── go.sum
@@ -14,4 +17,4 @@
 ├── services
 └── tree.txt
 
-6 directories, 9 files
+6 directories, 12 files
