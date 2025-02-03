@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
-	"github.com/lordofthemind/gollama/helpers"
 	"github.com/spf13/viper"
 )
 
@@ -31,7 +31,7 @@ func LoadGlobalConfig() (GollamaGlobalConfig, string, error) {
 	var config GollamaGlobalConfig
 
 	// Get configuration path
-	configPath, err := helpers.GetConfigPath()
+	configPath, err := GetConfigPath()
 	if err != nil {
 		return config, "", err
 	}
@@ -112,4 +112,21 @@ func createDefaultConfig() GollamaGlobalConfig {
 		}{Model: "", Temp: 0.0},
 		SetupCompleted: false,
 	}
+}
+
+// GetConfigPath determines the path of the configuration file
+func GetConfigPath() (string, error) {
+	if customPath := os.Getenv("GOLLAMA_CONFIG"); customPath != "" {
+		return customPath, nil
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	if runtime.GOOS == "windows" {
+		return filepath.Join(homeDir, "AppData", "Roaming", "Gollama", "gollama.yaml"), nil
+	}
+	return filepath.Join(homeDir, ".config", "Gollama", "gollama.yaml"), nil
 }

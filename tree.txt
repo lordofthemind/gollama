@@ -18,15 +18,14 @@
 │   └── GollamaConfigs.go
 ├── go.mod
 ├── go.sum
+├── gollama.go
 ├── gollama.go.tpl
 ├── helpers
 │   ├── ChatHelpers.go
 │   ├── CnfgHelpers.go
 │   ├── IoHelpers.go
-│   ├── PathHelper.go
 │   ├── RootHelpers.go
 │   └── UpdtHelpers.go
-├── main.go
 ├── services
 │   ├── ChatServices.go
 │   ├── CnfgServices.go
@@ -34,4 +33,4 @@
 │   └── UpdtServices.go
 └── tree.txt
 
-9 directories, 26 files
+9 directories, 25 files
